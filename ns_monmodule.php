@@ -1,7 +1,5 @@
 <?php
 
-
-
 if (!defined('_PS_VERSION_')) {
     exit;
 }
@@ -40,7 +38,7 @@ class Ns_MonModule extends Module
         if (Shop::isFeatureActive()) {
             Shop::setContext(Shop::CONTEXT_ALL);
         }
-     
+
         if (!parent::install() ||
             !$this->registerHook('leftColumn') ||
             !$this->registerHook('header') ||
@@ -48,7 +46,7 @@ class Ns_MonModule extends Module
         ) {
             return false;
         }
-     
+
         return true;
     }
 
@@ -59,19 +57,19 @@ class Ns_MonModule extends Module
         ) {
             return false;
         }
-     
+
         return true;
     }
 
     public function getContent()
     {
         $output = null;
-    
+
         if (Tools::isSubmit('btnSubmit')) {
             $pageName = strval(Tools::getValue('NS_MONMODULE_PAGENAME'));
-    
+
             if (
-                !$pageName||
+                !$pageName ||
                 empty($pageName)
             ) {
                 $output .= $this->displayError($this->l('Invalid Configuration value'));
@@ -80,15 +78,15 @@ class Ns_MonModule extends Module
                 $output .= $this->displayConfirmation($this->l('Settings updated'));
             }
         }
-    
-        return $output.$this->displayForm();
+
+        return $output . $this->displayForm();
     }
 
     public function displayForm()
     {
         // Récupère la langue par défaut
-        $defaultLang = (int)Configuration::get('PS_LANG_DEFAULT');
-    
+        $defaultLang = (int) Configuration::get('PS_LANG_DEFAULT');
+
         // Initialise les champs du formulaire dans un tableau
         $form = array(
             'form' => array(
@@ -101,30 +99,30 @@ class Ns_MonModule extends Module
                         'label' => $this->l('Configuration value'),
                         'name' => 'NS_MONMODULE_PAGENAME',
                         'size' => 20,
-                        'required' => true
-                    )
+                        'required' => true,
+                    ),
                 ),
                 'submit' => array(
                     'title' => $this->l('Save'),
-                    'name'  => 'btnSubmit'
-                )
+                    'name' => 'btnSubmit',
+                ),
             ),
         );
-    
+
         $helper = new HelperForm();
-    
+
         // Module, token et currentIndex
         $helper->module = $this;
         $helper->name_controller = $this->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
-        $helper->currentIndex = AdminController::$currentIndex.'&configure='.$this->name;
-    
+        $helper->currentIndex = AdminController::$currentIndex . '&configure=' . $this->name;
+
         // Langue
-        $helper->default_form_language = $defaultLang;   
-    
+        $helper->default_form_language = $defaultLang;
+
         // Charge la valeur de NS_MONMODULE_PAGENAME depuis la base
         $helper->fields_value['NS_MONMODULE_PAGENAME'] = Configuration::get('NS_MONMODULE_PAGENAME');
-    
+
         return $helper->generateForm(array($form));
     }
 
@@ -132,9 +130,18 @@ class Ns_MonModule extends Module
     {
         $this->context->smarty->assign([
             'ns_page_name' => Configuration::get('NS_MONMODULE_PAGENAME'),
-            'ns_page_link' => $this->context->link->getModuleLink('ns_monmodule', 'display')
+            'ns_page_link' => $this->context->link->getModuleLink('ns_monmodule', 'display'),
         ]);
-    
+
         return $this->display(__FILE__, 'ns_monmodule.tpl');
+    }
+
+    public function hookDisplayHeader()
+    {
+        $this->context->controller->registerStylesheet(
+            'ns_monmodule',
+            $this->_path . 'views/css/ns_monmodule.css',
+            ['server' => 'remote', 'position' => 'head', 'priority' => 150]
+        );
     }
 }
